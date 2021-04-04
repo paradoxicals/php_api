@@ -92,6 +92,7 @@ class userController extends Controller {
 					  CURLOPT_CUSTOMREQUEST => "POST",
 					  CURLOPT_POSTFIELDS => "receipt=$receipt",
 					  CURLOPT_HTTPHEADER => array(
+					  	"Authorization: Basic c3JrbmRuc246YlNhZEZkN2Mq",
 					    "Content-Type: application/x-www-form-urlencoded",
 					    "Postman-Token: 864e29d3-6bc8-43fd-944b-a314c1c84d18",
 					    "cache-control: no-cache"

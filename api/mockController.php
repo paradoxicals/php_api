@@ -6,30 +6,42 @@ class mockController extends Controller {
 
 	public function verify (){
 		if ($_POST) {
+			$AUTH_USER = 'srkndnsn';
+			$AUTH_PASS = 'bSadFd7c*';
 
+			$hasSuppliedCredentials = !(empty($_SERVER['PHP_AUTH_USER']) && empty($_SERVER['PHP_AUTH_PW']));
 			$receipt = mHelper::postCharVariableControl("receipt");
 
-			if ($receipt != ""){
+			$isNotAuthenticated = (!$hasSuppliedCredentials || $_SERVER['PHP_AUTH_USER'] != $AUTH_USER ||
+				$_SERVER['PHP_AUTH_PW']   != $AUTH_PASS);
 
-				$receiptControlChar = substr($receipt, -1);
-				if (intval($receiptControlChar)%2 == 0){
-					$returnArray['status'] = true;
-					$returnArray['message'] = "Successful";
+			if ($isNotAuthenticated) {
+				
+				$returnArray['status'] = false;
+				$returnArray['message'] = "Authorization Required";
+			}
+			else{
+				if ($receipt != ""){
 
-					date_default_timezone_set('America/Denver');
-					$returnArray['expireDate'] =  date('Y-m-d H:i:s');
+					$receiptControlChar = substr($receipt, -1);
+					if (intval($receiptControlChar)%2 == 0){
+						$returnArray['status'] = true;
+						$returnArray['message'] = "Successful";
+
+						date_default_timezone_set('America/Denver');
+						$returnArray['expireDate'] =  date('Y-m-d H:i:s');
+					}
+					else{
+						$returnArray['status'] = false;
+						$returnArray['message'] = "The receipt is invalid ";
+					}
+
 				}
 				else{
 					$returnArray['status'] = false;
-					$returnArray['message'] = "The receipt is invalid ";
+					$returnArray['message'] = "The variable/variables are invalid or empty";
 				}
-
-			}
-			else{
-				$returnArray['status'] = false;
-				$returnArray['message'] = "The variable/variables are invalid or empty";
-			}
-
+			}	
 			
 		}
 		else{
