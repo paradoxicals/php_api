@@ -3,6 +3,7 @@
 class userController extends Controller {
 
 	protected $returnArray = [];
+
 	public function register (){
 		if ($_POST) {
 
@@ -154,5 +155,41 @@ class userController extends Controller {
 
 		echo json_encode($returnArray);
 		$returnArray = [];
+	}
+
+
+	public function checkSubscription (){
+		if ($_POST) {
+
+			$clientToken = mHelper::postCharVariableControl("client_token");
+
+			if ($clientToken != ""){
+
+				$query = $this->db->prepare("select status from mobile_users where client_token = '$clientToken' and status = true");
+				$query->execute();
+				$count = $query->rowCount();
+
+				if ($count != 0){
+					$returnArray['status'] = true;
+					$returnArray['message'] = "The mobile user have subscription record.";
+				}
+				else{
+					$returnArray['status'] = false;
+					$returnArray['message'] = "The mobile user has not any subscription record.";				
+				}
+
+			}
+			else{
+				$returnArray['status'] = false;
+				$returnArray['message'] = "The variable/variables are invalid or empty";
+			}
+		}
+		else{
+			$returnArray['status'] = false;
+			$returnArray['message'] = "The method should be POST";
+		}
+
+		echo json_encode($returnArray);
+		$returnArray = [];	
 	}
 }

@@ -6,20 +6,13 @@ require_once 'system/controller.php';
 require_once 'route/router.php';
 require_once 'helper/mhelper.php';
 
-$returnArray = [];
+try {
+	Router::start('/user/register', 'userController@register');
+	Router::start('/user/purchase', 'userController@purchase');
+	Router::start('/mockApi/control', 'mockController@verify');
+	Router::start('/user/check', 'userController@checkSubscription');
 
-//Router::start('/','user@index');
-Router::start('/user/register', 'userController@register');
-Router::start('/user/purchase', 'userController@purchase');
-/*
+} catch (Exception $e) {
+	echo $e->getMessage();
+}
 
-$database = new Database();
-
-$returnArray = [];
-
-$mode = $_GET['mode'];
-$process = $_GET['process'];
-
-require_once 'api/'.$mode.'/'.$process.'.php';
-*/
-//echo json_encode($returnArray);

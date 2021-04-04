@@ -13,16 +13,18 @@ class Router{
 			if (is_callable($callback)){
 				call_user_func_array($callback, array());
 			}
+
+			$currentController = explode('@',$callback);
+
+			if(file_exists('api/'.$currentController[0].'.php')){
+				require_once 'api/'.$currentController[0].'.php';
+				call_user_func_array([new $currentController[0], $currentController[1]],array());
+			}
+			else{
+				die("404 not found");
+			}
 		}
 
-		$currentController = explode('@',$callback);
-
-		if(file_exists('api/'.$currentController[0].'.php')){
-			require_once 'api/'.$currentController[0].'.php';
-			call_user_func_array([new $currentController[0], $currentController[1]],array());
-		}
-		else{
-			die("404 not found");
-		}
+		
 	}
 }
