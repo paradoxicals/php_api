@@ -2,11 +2,10 @@
 
 class userController extends Controller {
 
-
+	protected $returnArray = [];
 	public function register (){
 		if ($_POST) {
 
-			$returnArray = [];
 			$uid = mHelper::postCharVariableControl("uid");
 			$appid = mHelper::postCharVariableControl("appid");
 			$language = mHelper::postNumericVariableControl("language");
@@ -14,18 +13,26 @@ class userController extends Controller {
 
 			if ($uid != "" and $appid != "" and $language != 0 and $os != ""){
 
-				$query = $this->db->prepare("select * from mobile_users where uid = '$uid'");
+				$query = $this->db->prepare("select client_token from mobile_users where uid = '$uid'");
 				$query->execute();
 				$count = $query->rowCount();
 
 				if ($count != 0){
+
+					$result = $query->fetch(PDO::FETCH_ASSOC);
+
 					$returnArray['status'] = true;
 					$returnArray['message'] = "Register OK";
-					$returnArray['clientToken'] = "qwopeksldk";//***
+					$returnArray['clientToken'] = $result['client_token'];
 				}
 				else{
-					$insertQuery = $this->db->prepare("insert into mobile_users(uid,appid,language,os,status) values('$uid','$appid',
-						$language,'$os',true) ");
+
+					$token = openssl_random_pseudo_bytes(16);
+					$token = bin2hex($token);
+					
+
+					$insertQuery = $this->db->prepare("insert into mobile_users(uid,appid,language,os,status,client_token) values('$uid',
+						'$appid',$language,'$os',true,'$token') ");
 					$insertResult = $insertQuery->execute();
 
 					if ($insertResult){
@@ -36,7 +43,6 @@ class userController extends Controller {
 					else{
 						$returnArray['status'] = false;
 						$returnArray['message'] = "The mobile user can not be registered.";
-						return;
 					}
 				}
 
@@ -44,22 +50,28 @@ class userController extends Controller {
 			else{
 				$returnArray['status'] = false;
 				$returnArray['message'] = "The variable/variables are invalid or empty";
-				return;	
 			}
-			echo json_encode($returnArray);
 		}
 		else{
 			$returnArray['status'] = false;
 			$returnArray['message'] = "The method should be POST";
-			return;
 		}
 
-
+		echo json_encode($returnArray);
+		$returnArray = [];	
 	}
 
 	public function purchase (){
 		if ($_POST) {
-			echo "purchase";
+			$returnArray['status'] = true;
+			$returnArray['message'] = "Successfull";
 		}
+		else{
+			$returnArray['status'] = false;
+			$returnArray['message'] = "The method should be POST";
+		}
+
+		echo json_encode($returnArray);
+		$returnArray = [];
 	}
 }
