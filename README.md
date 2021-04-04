@@ -9,6 +9,8 @@ Purchase: Checks purchase requests with one simple Mock api then do db procedure
 checkSubscription: Checks user's status and return the result to the user.
 
 --
+
+
 The other classes is related with the api structure.
 
 mHelper : All validation processes are related to the post variables. In this way you can manage easily all validations with same functions. You dont need to write same code blocks when you need it.
