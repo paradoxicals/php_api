@@ -38,7 +38,7 @@ class userController extends Controller {
 					if ($insertResult){
 						$returnArray['status'] = true;
 						$returnArray['message'] = "The mobile user has been registered";
-						$returnArray['clientToken'] = "qwopeksldk";	//***
+						$returnArray['clientToken'] = $token;
 					}
 					else{
 						$returnArray['status'] = false;
@@ -63,8 +63,89 @@ class userController extends Controller {
 
 	public function purchase (){
 		if ($_POST) {
-			$returnArray['status'] = true;
-			$returnArray['message'] = "Successfull";
+
+			$clientToken = mHelper::postCharVariableControl("client_token");
+			$receipt = mHelper::postCharVariableControl("receipt");
+			
+
+			if ($clientToken != "" and $receipt != ""){
+
+				$query = $this->db->prepare("select client_token,uid,appid from mobile_users where client_token = '$clientToken'");
+				$query->execute();
+				$count = $query->rowCount();
+
+				if ($count != 0){
+
+					$result = $query->fetch(PDO::FETCH_ASSOC);
+
+					// Mock Api Control
+					$curl = curl_init();
+
+					curl_setopt_array($curl, array(
+					  CURLOPT_URL => "http://127.0.0.1/mockApi/control",
+					  CURLOPT_RETURNTRANSFER => true,
+					  CURLOPT_ENCODING => "",
+					  CURLOPT_MAXREDIRS => 10,
+					  CURLOPT_TIMEOUT => 30,
+					  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+					  CURLOPT_CUSTOMREQUEST => "POST",
+					  CURLOPT_POSTFIELDS => "receipt=$receipt",
+					  CURLOPT_HTTPHEADER => array(
+					    "Content-Type: application/x-www-form-urlencoded",
+					    "Postman-Token: 864e29d3-6bc8-43fd-944b-a314c1c84d18",
+					    "cache-control: no-cache"
+					  ),
+					));
+
+					$response = curl_exec($curl);
+					$err = curl_error($curl);
+
+					curl_close($curl);
+
+					if ($err) {
+						$returnArray['status'] = true;
+						$returnArray['message'] = "Can not reach Mock Api - cURL Error #:" . $err;					  
+					} 
+					else {
+						$purchaseResponse= json_decode($response);
+
+					   if ($purchaseResponse->status == true) {
+					   		$purchaseUid = $result['uid'];
+					   		$purchaseAppId = $result['appid'];
+					   		$purchaseExpireDate = $purchaseResponse->expireDate;
+
+					   		$insertQuery = $this->db->prepare("insert into purchases(uid,appid,receipt,expire_date) 
+					   			values('$purchaseUid','$purchaseAppId', '$receipt', '$purchaseExpireDate') ");
+							$insertResult = $insertQuery->execute();
+							
+							if ($insertResult){
+								$returnArray['status'] = true;
+								$returnArray['message'] = "The purchase completed successfully";
+							}
+							else{
+								$returnArray['status'] = false;
+								$returnArray['message'] = "The purchase can not be completed";
+							}
+					   }
+					   else{
+					   		$returnArray['status'] = false;
+							$returnArray['message'] = "The purchase can not be completed";
+					   }
+					}
+					
+				}
+				else{
+					$returnArray['status'] = false;
+					$returnArray['message'] = "The invalid/wrong token";
+				}
+
+			}
+			else{
+				$returnArray['status'] = false;
+				$returnArray['message'] = "The variable/variables are invalid or empty";
+			}
+
+			
 		}
 		else{
 			$returnArray['status'] = false;
